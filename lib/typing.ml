@@ -95,8 +95,8 @@ let rec infer ctx e =
 
 and infer_var ctx x =
   try
-    let sch = Ctx.find x ctx in
-    let t = instantiate sch in
+    let s = Ctx.find x ctx in
+    let t = instantiate s in
     (t, [])
   with Not_found -> failwith ("Unbound variable " ^ x)
 
@@ -126,10 +126,10 @@ and infer_if ctx e1 e2 e3 =
   (t', c1 @ c2 @ c3 @ c)
 
 and infer_fun ctx x e =
-  let t1 = fresh_var () in
-  let ctx' = Ctx.add x (Forall ([], t1)) ctx in
+  let t1' = fresh_var () in
+  let ctx' = Ctx.add x (Forall ([], t1')) ctx in
   let t2, c2 = infer ctx' e in
-  (TArrow (t1, t2), c2)
+  (TArrow (t1', t2), c2)
 
 and infer_app ctx e1 e2 =
   let t' = fresh_var () in
@@ -139,13 +139,12 @@ and infer_app ctx e1 e2 =
   (t', c1 @ c2 @ c)
 
 and infer_rec ctx x e =
-  let t' = fresh_var () in
-  let ctx' = Ctx.add x (Forall ([], t')) ctx in
-  let t, c = infer ctx' e in
-  let c' = [ (t', t) ] in
-  (t', c @ c')
+  let t1' = fresh_var () in
+  let env' = Ctx.add x (Forall ([], t1')) ctx in
+  let t2, c2 = infer env' e in
+  let c = [ (t1', t2) ] in
+  (t1', c2 @ c)
 
-(** [infer_top e] returns the type of the expression [e] in the empty context. *)
 let infer_top e =
   let t, cs = infer Ctx.empty e in
   let substs = unify cs in

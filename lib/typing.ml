@@ -91,6 +91,7 @@ let rec infer ctx e =
   | EIf (e1, e2, e3) -> infer_if ctx e1 e2 e3
   | EFun (x, e) -> infer_fun ctx x e
   | EApp (e1, e2) -> infer_app ctx e1 e2
+  | ERec (x, e) -> infer_rec ctx x e
 
 and infer_var ctx x =
   try
@@ -137,6 +138,14 @@ and infer_app ctx e1 e2 =
   let c = [ (t1, TArrow (t2, t')) ] in
   (t', c1 @ c2 @ c)
 
+and infer_rec ctx x e =
+  let t' = fresh_var () in
+  let ctx' = Ctx.add x (Forall ([], t')) ctx in
+  let t, c = infer ctx' e in
+  let c' = [ (t', t) ] in
+  (t', c @ c')
+
+(** [infer_top e] returns the type of the expression [e] in the empty context. *)
 let infer_top e =
   let t, cs = infer Ctx.empty e in
   let substs = unify cs in

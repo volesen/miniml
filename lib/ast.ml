@@ -1,13 +1,13 @@
 type binop =
   (* For now we skip `eq` as it requires typeclasses *)
   | Add
-  | Lt
+  | Lte
 
 type expr =
   | EInt of int
   | EBool of bool
-  | EBinop of binop * expr * expr
   | EVar of string
+  | EBinop of binop * expr * expr
   | ELet of string * expr * expr
   | EIf of expr * expr * expr
   | EApp of expr * expr

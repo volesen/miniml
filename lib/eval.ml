@@ -13,12 +13,19 @@ let rec eval env e =
   | EBool b -> VBool b
   | EFun (x, e) -> VClosure (x, e, env)
   | EVar x -> eval_var env x
+  | EBinop (op, e1, e2) -> eval_binop env op e1 e2
   | ELet (x, e1, e2) -> eval_let env x e1 e2
   | EIf (e1, e2, e3) -> eval_if env e1 e2 e3
   | EApp (e1, e2) -> eval_app env e1 e2
 
 and eval_var env x =
   try Env.find x env with Not_found -> failwith err_unbnound_var
+
+and eval_binop env op e1 e2 =
+  match (op, eval env e1, eval env e2) with
+  | Add, VInt i, VInt j -> VInt (i + j)
+  | Lte, VInt i, VInt j -> VBool (i <= j)
+  | _ -> failwith err_type_error
 
 and eval_let env x e1 e2 =
   let v1 = eval env e1 in

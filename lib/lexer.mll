@@ -28,5 +28,7 @@ rule read =
 	| "else" { ELSE }
 	| "let" { LET }
 	| "in" { IN }
+	| "fun" { FUN }
+	| "->" { ARROW }
 	| int { INT (int_of_string (Lexing.lexeme lexbuf)) }
 	| id { ID (Lexing.lexeme lexbuf) }

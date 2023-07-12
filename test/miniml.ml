@@ -74,11 +74,37 @@ let test_parse_if () =
     (EIf (EBool true, EInt 1, EInt 2))
     (parse "if true then 1 else 2")
 
+let test_parse_if_assoc () =
+  Alcotest.(check testable_expr)
+    "if true then 1 else if false then 2 else 3"
+    (EIf
+       ( EBool true,
+         EInt 1,
+         EIf (EBool false, EInt 2, EInt 3) ))
+    (parse "if true then 1 else if false then 2 else 3")
+
 let test_parse_if_prec () =
   Alcotest.(check testable_expr)
     "if true then 1 else 2 + 3"
     (EIf (EBool true, EInt 1, EBinop (Add, EInt 2, EInt 3)))
     (parse "if true then 1 else 2 + 3")
+
+let test_parse_let () =
+  Alcotest.(check testable_expr)
+    "let x = 1 in x + 2"
+    (ELet ("x", EInt 1, EBinop (Add, EVar "x", EInt 2)))
+    (parse "let x = 1 in x + 2")
+
+let test_parse_let_assoc () =
+  Alcotest.(check testable_expr)
+    "let x = 1 in let y = 2 in x + y"
+    (ELet
+       ( "x",
+         EInt 1,
+         ELet ("y", EInt 2, EBinop (Add, EVar "x", EVar "y")) ))
+    (parse "let x = 1 in let y = 2 in x + y")
+
+
 
 let testable_value =
   let pp_value pp v =
@@ -119,6 +145,9 @@ let () =
           Alcotest.test_case "precedence" `Quick test_parse_prec;
           Alcotest.test_case "if" `Quick test_parse_if;
           Alcotest.test_case "if precedence" `Quick test_parse_if_prec;
+          Alcotest.test_case "if associativity" `Quick test_parse_if_assoc;
+          Alcotest.test_case "let" `Quick test_parse_let;
+          Alcotest.test_case "let associativity" `Quick test_parse_let_assoc;
         ] );
       ("typing", [ Alcotest.test_case "infer" `Quick test_infer ]);
       ("eval", [ Alcotest.test_case "eval" `Quick test_eval ]);

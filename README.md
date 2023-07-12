@@ -7,7 +7,7 @@ A minimal ML dialect, but with ad-hoc polymorphism through type classes.
 - [ ] Lexer
 - [ ] Parser
 - [x] Basic interpreter
-- [ ] Recursion
+- [x] Recursion
 - [ ] Mutual recursion
 - [x] Type inference with let-polymorphism
 - [ ] Type classes
@@ -15,3 +15,4 @@ A minimal ML dialect, but with ad-hoc polymorphism through type classes.
 ## References
 
 - [The Hindley-Milner Type System](https://cs3110.github.io/textbook/chapters/interp/inference.html)
+- [Recursive closures](https://jerrington.me/posts/2023-01-20-recursive-closures.html)

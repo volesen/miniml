@@ -1,6 +1,6 @@
 open Eval
 open Typing
+open Parse
 
 let base = Env.empty
-let parse _ = failwith "Not implemented"
-let interpret s = s |> parse |> typecheck |> eval base
+let interpret (s : string) : value = s |> parse |> typecheck |> eval base

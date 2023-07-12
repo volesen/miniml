@@ -13,6 +13,7 @@ let whitespace = [' ' '\t']+
 rule read =
 	parse
 	| eof { EOF }
+	| whitespace { read lexbuf }
 	| '(' { LPAREN }
 	| ')' { RPAREN }
 	| '+' { PLUS }

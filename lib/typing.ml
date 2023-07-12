@@ -86,6 +86,7 @@ let rec infer ctx e =
   | EInt _ -> (TInt, [])
   | EBool _ -> (TBool, [])
   | EVar x -> infer_var ctx x
+  | EBinop (op, e1, e2) -> infer_binop ctx op e1 e2
   | ELet (x, e1, e2) -> infer_let ctx x e1 e2
   | EIf (e1, e2, e3) -> infer_if ctx e1 e2 e3
   | EFun (x, e) -> infer_fun ctx x e
@@ -97,6 +98,17 @@ and infer_var ctx x =
     let t = instantiate sch in
     (t, [])
   with Not_found -> failwith ("Unbound variable " ^ x)
+
+and infer_binop ctx op e1 e2 =
+  let t1, c1 = infer ctx e1 in
+  let t2, c2 = infer ctx e2 in
+  match op with
+  | Add ->
+      let c = [ (t1, TInt); (t2, TInt) ] in
+      (TInt, c1 @ c2 @ c)
+  | Lte ->
+      let c = [ (t1, TInt); (t2, TInt) ] in
+      (TBool, c1 @ c2 @ c)
 
 and infer_let ctx x e1 e2 =
   let t1, c1 = infer ctx e1 in

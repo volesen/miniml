@@ -19,11 +19,14 @@ rule read =
 	| '+' { PLUS }
 	| '-' { MINUS }
 	| '*' { STAR }
+	| '=' { EQUALS }
 	| "<=" { LTE }
 	| "true" { TRUE }
 	| "false" { FALSE }
 	| "if" { IF }
 	| "then" { THEN }
 	| "else" { ELSE }
+	| "let" { LET }
+	| "in" { IN }
 	| int { INT (int_of_string (Lexing.lexeme lexbuf)) }
 	| id { ID (Lexing.lexeme lexbuf) }

@@ -22,5 +22,8 @@ rule read =
 	| "<=" { LTE }
 	| "true" { TRUE }
 	| "false" { FALSE }
+	| "if" { IF }
+	| "then" { THEN }
+	| "else" { ELSE }
 	| int { INT (int_of_string (Lexing.lexeme lexbuf)) }
 	| id { ID (Lexing.lexeme lexbuf) }

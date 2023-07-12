@@ -56,6 +56,12 @@ let test_parse_lte () =
     (EBinop (Lte, EInt 1, EInt 2))
     (parse "1 <= 2")
 
+let test_parse_lte_assoc () =
+  Alcotest.(check testable_expr)
+    "1 <= 2 <= 3"
+    (EBinop (Lte, EBinop (Lte, EInt 1, EInt 2), EInt 3))
+    (parse "1 <= 2 <= 3")
+
 let test_parse_assoc () =
   Alcotest.(check testable_expr)
     "1 + 2 + 3"
@@ -110,6 +116,24 @@ let test_parse_let_assoc () =
     (ELet ("x", EInt 1, ELet ("y", EInt 2, EBinop (Add, EVar "x", EVar "y"))))
     (parse "let x = 1 in let y = 2 in x + y")
 
+let test_parse_fun () =
+  Alcotest.(check testable_expr)
+    "fun x -> x + 1"
+    (EFun ("x", EBinop (Add, EVar "x", EInt 1)))
+    (parse "fun x -> x + 1")
+
+let test_parse_fun_prec () =
+  Alcotest.(check testable_expr)
+    "fun x -> x + 1 * 2"
+    (EFun ("x", EBinop (Add, EVar "x", EBinop (Mul, EInt 1, EInt 2))))
+    (parse "fun x -> x + 1 * 2")
+
+let test_parse_fun_assoc () =
+  Alcotest.(check testable_expr)
+    "fun x -> fun y -> x + y"
+    (EFun ("x", EFun ("y", EBinop (Add, EVar "x", EVar "y"))))
+    (parse "fun x -> fun y -> x + y")
+
 let testable_value =
   let pp_value pp v =
     match v with
@@ -145,6 +169,8 @@ let () =
           Alcotest.test_case "sub" `Quick test_parse_sub;
           Alcotest.test_case "mul" `Quick test_parse_mul;
           Alcotest.test_case "less than equal" `Quick test_parse_lte;
+          Alcotest.test_case "less than equal associativity" `Quick
+            test_parse_lte_assoc;
           Alcotest.test_case "associativity" `Quick test_parse_assoc;
           Alcotest.test_case "precedence" `Quick test_parse_prec;
           Alcotest.test_case "paren precedence" `Quick test_parse_paren_prec;
@@ -154,6 +180,9 @@ let () =
           Alcotest.test_case "let" `Quick test_parse_let;
           Alcotest.test_case "let precedence" `Quick test_parse_let_prec;
           Alcotest.test_case "let associativity" `Quick test_parse_let_assoc;
+          Alcotest.test_case "fun" `Quick test_parse_fun;
+          Alcotest.test_case "fun precedence" `Quick test_parse_fun_prec;
+          Alcotest.test_case "fun associativity" `Quick test_parse_fun_assoc;
         ] );
       ("typing", [ Alcotest.test_case "infer" `Quick test_infer ]);
       ("eval", [ Alcotest.test_case "eval" `Quick test_eval ]);

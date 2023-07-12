@@ -12,3 +12,4 @@ type expr =
   | EIf of expr * expr * expr
   | EApp of expr * expr
   | EFun of string * expr
+  | ERec of string * expr

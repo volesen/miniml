@@ -2,7 +2,8 @@ open Ast
 module Env = Map.Make (String)
 
 type value = VInt of int | VBool of bool | VClosure of string * expr * env
-and env = value Env.t
+and envbinding = value option ref
+and env = envbinding Env.t
 
 let err_unbnound_var = "Unbound variable"
 let err_type_error = "Type error"
@@ -17,9 +18,14 @@ let rec eval env e =
   | ELet (x, e1, e2) -> eval_let env x e1 e2
   | EIf (e1, e2, e3) -> eval_if env e1 e2 e3
   | EApp (e1, e2) -> eval_app env e1 e2
+  | ERec (x, e) -> eval_rec env x e
 
 and eval_var env x =
-  try Env.find x env with Not_found -> failwith err_unbnound_var
+  try
+    match !(Env.find x env) with
+    | Some v -> v
+    | None -> failwith "Right hand side of `let rec` has to be a function"
+  with Not_found -> failwith err_unbnound_var
 
 and eval_binop env op e1 e2 =
   match (op, eval env e1, eval env e2) with
@@ -29,7 +35,7 @@ and eval_binop env op e1 e2 =
 
 and eval_let env x e1 e2 =
   let v1 = eval env e1 in
-  let env' = Env.add x v1 env in
+  let env' = Env.add x (ref (Some v1)) env in
   eval env' e2
 
 and eval_if env e1 e2 e3 =
@@ -41,6 +47,14 @@ and eval_app env e1 e2 =
   match eval env e1 with
   | VClosure (x, e, defenv) ->
       let v2 = eval env e2 in
-      let defenv' = Env.add x v2 defenv in
+      let defenv' = Env.add x (ref (Some v2)) defenv in
       eval defenv' e
   | VInt _ | VBool _ -> failwith err_type_error
+
+and eval_rec env x e =
+  let v' = ref None in
+  let env' = Env.add x v' env in
+  let v = eval env' e in
+  (* Tying the recursive knot *)
+  v' := Some v;
+  v

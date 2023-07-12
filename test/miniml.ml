@@ -68,6 +68,12 @@ let test_parse_prec () =
     (EBinop (Add, EInt 1, EBinop (Mul, EInt 2, EInt 3)))
     (parse "1 + 2 * 3")
 
+let test_parse_paren_prec () =
+  Alcotest.(check testable_expr)
+    "(1 + 2) * 3"
+    (EBinop (Mul, EBinop (Add, EInt 1, EInt 2), EInt 3))
+    (parse "(1 + 2) * 3")
+
 let test_parse_if () =
   Alcotest.(check testable_expr)
     "if true then 1 else 2"
@@ -141,6 +147,7 @@ let () =
           Alcotest.test_case "less than equal" `Quick test_parse_lte;
           Alcotest.test_case "associativity" `Quick test_parse_assoc;
           Alcotest.test_case "precedence" `Quick test_parse_prec;
+          Alcotest.test_case "paren precedence" `Quick test_parse_paren_prec;
           Alcotest.test_case "if" `Quick test_parse_if;
           Alcotest.test_case "if precedence" `Quick test_parse_if_prec;
           Alcotest.test_case "if associativity" `Quick test_parse_if_assoc;

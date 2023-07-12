@@ -11,6 +11,7 @@ A minimal ML dialect, but with ad-hoc polymorphism through type classes.
 - [ ] Mutual recursion
 - [x] Type inference with let-polymorphism
 - [ ] Type classes
+- [ ] REPL
 
 ## References
 

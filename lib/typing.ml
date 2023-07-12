@@ -104,7 +104,7 @@ and infer_binop ctx op e1 e2 =
   let t1, c1 = infer ctx e1 in
   let t2, c2 = infer ctx e2 in
   match op with
-  | Add | Sub ->
+  | Add | Sub | Mul ->
       let c = [ (t1, TInt); (t2, TInt) ] in
       (TInt, c1 @ c2 @ c)
   | Lte ->

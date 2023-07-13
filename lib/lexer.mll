@@ -30,5 +30,6 @@ rule read =
 	| "in" { IN }
 	| "fun" { FUN }
 	| "->" { ARROW }
+	| "rec" { REC }
 	| int { INT (int_of_string (Lexing.lexeme lexbuf)) }
 	| id { ID (Lexing.lexeme lexbuf) }

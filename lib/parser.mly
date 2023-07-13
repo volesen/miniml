@@ -11,12 +11,13 @@ open Ast
 %token IF THEN ELSE
 %token LET IN
 %token FUN ARROW
+%token REC
 
 %nonassoc ELSE IN ARROW
 %left LTE
 %left PLUS MINUS
 %left STAR
-%nonassoc INT ID TRUE FALSE LPAREN FUN IF LET // Tokens that start an expression
+%nonassoc INT ID TRUE FALSE LPAREN IF LET FUN REC // Tokens that start an expression
 %nonassoc APP // Only used for precedence
 
 %start program
@@ -40,6 +41,7 @@ expr:
 	| LET; x = ID; EQUALS; e1 = expr; IN; e2 = expr { ELet(x, e1, e2) }
 	| LPAREN; e = expr; RPAREN { e }
 	| FUN; x = ID; ARROW; e = expr { EFun(x, e) }
+	| REC; x = ID; ARROW; e = expr { ERec(x, e) }
 	| e1 = expr; e2 = expr %prec APP { EApp(e1, e2) }
 	;
 

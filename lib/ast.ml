@@ -2,6 +2,7 @@ type binop =
   (* For now we skip `eq` as it requires typeclasses *)
   | Add
   | Sub
+  | Mul
   | Lte
 
 type expr =

@@ -31,6 +31,7 @@ and eval_binop env op e1 e2 =
   match (op, eval env e1, eval env e2) with
   | Add, VInt i, VInt j -> VInt (i + j)
   | Sub, VInt i, VInt j -> VInt (i - j)
+  | Mul, VInt i, VInt j -> VInt (i * j)
   | Lte, VInt i, VInt j -> VBool (i <= j)
   | _ -> failwith err_type_error
 

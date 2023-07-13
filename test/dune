@@ -1,2 +1,3 @@
 (test
- (name miniml))
+ (name miniml)
+ (libraries miniml alcotest))

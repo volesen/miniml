@@ -5,34 +5,23 @@ open Ast
 %token EOF
 %token <int> INT
 %token <string> ID
-%token LPAREN
-%token RPAREN
-%token PLUS
-%token MINUS
-%token STAR
-%token EQUALS
-%token LTE
-%token TRUE
-%token FALSE
-%token IF
-%token THEN
-%token ELSE
-%token LET
-%token IN
-%token FUN
-%token ARROW
+%token LPAREN RPAREN
+%token PLUS MINUS STAR EQUALS LTE
+%token TRUE FALSE
+%token IF THEN ELSE
+%token LET IN
+%token FUN ARROW
 
-%nonassoc ARROW
-%nonassoc ELSE
-%nonassoc IN
+%nonassoc ELSE IN ARROW
 %left LTE
 %left PLUS MINUS
 %left STAR
-%nonassoc INT ID TRUE FALSE LPAREN IF LET FUN /* ALL other tokens that start an expr */
-%nonassoc APP
+%nonassoc INT ID TRUE FALSE LPAREN FUN IF LET // Tokens that start an expression
+%nonassoc APP // Only used for precedence
 
-%start <Ast.expr>program
+%start program
 
+%type <Ast.expr>program
 %type <Ast.expr>expr;
 
 %%
@@ -51,7 +40,7 @@ expr:
 	| LET; x = ID; EQUALS; e1 = expr; IN; e2 = expr { ELet(x, e1, e2) }
 	| LPAREN; e = expr; RPAREN { e }
 	| FUN; x = ID; ARROW; e = expr { EFun(x, e) }
-	| e1 = expr; e2 = expr { EApp(e1, e2) } %prec APP
+	| e1 = expr; e2 = expr %prec APP { EApp(e1, e2) }
 	;
 
 %inline bin_op:

@@ -1,20 +1,7 @@
 open Miniml.Ast
+open Miniml.Parse
 open Miniml.Typing
 open Miniml.Eval
-open Miniml.Parse
-
-let sum_to =
-  ERec
-    ( "sum_to",
-      EFun
-        ( "n",
-          EIf
-            ( EBinop (Lte, EVar "n", EInt 0),
-              EInt 0,
-              EBinop
-                ( Add,
-                  EVar "n",
-                  EApp (EVar "sum_to", EBinop (Sub, EVar "n", EInt 1)) ) ) ) )
 
 let testable_expr =
   let rec pp_expr pp e = Fmt.pf pp "%a" pp_expr e in
@@ -134,6 +121,27 @@ let test_parse_fun_assoc () =
     (EFun ("x", EFun ("y", EBinop (Add, EVar "x", EVar "y"))))
     (parse "fun x -> fun y -> x + y")
 
+let test_parse_app () =
+  Alcotest.(check testable_expr)
+    "(fun x -> x + 1) 2"
+    (EApp (EFun ("x", EBinop (Add, EVar "x", EInt 1)), EInt 2))
+    (parse "(fun x -> x + 1) 2")
+
+let test_parse_app_prec () =
+  Alcotest.(check testable_expr)
+    "fun x -> x + f 2"
+    (EFun ("x", EBinop (Add, EVar "x", EApp (EVar "f", EInt 2))))
+    (parse "fun x -> x + f 2")
+
+let test_parse_let_fun () =
+  Alcotest.(check testable_expr)
+    "let f = fun x -> x + 1 in f 2"
+    (ELet
+       ( "f",
+         EFun ("x", EBinop (Add, EVar "x", EInt 1)),
+         EApp (EVar "f", EInt 2) ))
+    (parse "let f = fun x -> x + 1 in f 2")
+
 let testable_value =
   let pp_value pp v =
     match v with
@@ -146,6 +154,19 @@ let testable_value =
 let testable_typ =
   let rec pp_typ pp t = Fmt.pf pp "%a" pp_typ t in
   Alcotest.testable pp_typ ( = )
+
+let sum_to =
+  ERec
+    ( "sum_to",
+      EFun
+        ( "n",
+          EIf
+            ( EBinop (Lte, EVar "n", EInt 0),
+              EInt 0,
+              EBinop
+                ( Add,
+                  EVar "n",
+                  EApp (EVar "sum_to", EBinop (Sub, EVar "n", EInt 1)) ) ) ) )
 
 let test_infer () =
   let ty = infer_top sum_to in
@@ -183,6 +204,9 @@ let () =
           Alcotest.test_case "fun" `Quick test_parse_fun;
           Alcotest.test_case "fun precedence" `Quick test_parse_fun_prec;
           Alcotest.test_case "fun associativity" `Quick test_parse_fun_assoc;
+          Alcotest.test_case "app" `Quick test_parse_app;
+          Alcotest.test_case "app precedence" `Quick test_parse_app_prec;
+          Alcotest.test_case "let fun" `Quick test_parse_let_fun;
         ] );
       ("typing", [ Alcotest.test_case "infer" `Quick test_infer ]);
       ("eval", [ Alcotest.test_case "eval" `Quick test_eval ]);

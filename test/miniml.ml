@@ -1,5 +1,5 @@
 open Miniml.Ast
-open Miniml.Parse
+open Miniml.Main
 open Miniml.Typing
 open Miniml.Eval
 

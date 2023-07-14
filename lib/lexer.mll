@@ -5,7 +5,7 @@ open Parser
 let digit = ['0'-'9']
 let alpha = ['a'-'z' 'A'-'Z']
 
-let int = '-'? digit+
+let int = digit+
 let id = alpha (alpha | digit | '_')*
 
 let whitespace = [' ' '\t']+

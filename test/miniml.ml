@@ -17,54 +17,54 @@ let test_parse_int () =
   Alcotest.(check testable_expr) "42" (EInt 42) (parse "42")
 
 let test_parse_neg_int () =
-  Alcotest.(check testable_expr) "-42" (EInt (-42)) (parse "-42")
+  Alcotest.(check testable_expr) "-42" (EUnOp(Neg, EInt(42))) (parse "-42")
 
 let test_parse_add () =
   Alcotest.(check testable_expr)
     "1 + 2"
-    (EBinop (Add, EInt 1, EInt 2))
+    (EBinOp (Add, EInt 1, EInt 2))
     (parse "1 + 2")
 
 let test_parse_sub () =
   Alcotest.(check testable_expr)
     "1 - 2"
-    (EBinop (Sub, EInt 1, EInt 2))
+    (EBinOp (Sub, EInt 1, EInt 2))
     (parse "1 - 2")
 
 let test_parse_mul () =
   Alcotest.(check testable_expr)
     "1 * 2"
-    (EBinop (Mul, EInt 1, EInt 2))
+    (EBinOp (Mul, EInt 1, EInt 2))
     (parse "1 * 2")
 
 let test_parse_lte () =
   Alcotest.(check testable_expr)
     "1 <= 2"
-    (EBinop (Lte, EInt 1, EInt 2))
+    (EBinOp (Lte, EInt 1, EInt 2))
     (parse "1 <= 2")
 
 let test_parse_lte_assoc () =
   Alcotest.(check testable_expr)
     "1 <= 2 <= 3"
-    (EBinop (Lte, EBinop (Lte, EInt 1, EInt 2), EInt 3))
+    (EBinOp (Lte, EBinOp (Lte, EInt 1, EInt 2), EInt 3))
     (parse "1 <= 2 <= 3")
 
 let test_parse_assoc () =
   Alcotest.(check testable_expr)
     "1 + 2 + 3"
-    (EBinop (Add, EBinop (Add, EInt 1, EInt 2), EInt 3))
+    (EBinOp (Add, EBinOp (Add, EInt 1, EInt 2), EInt 3))
     (parse "1 + 2 + 3")
 
 let test_parse_prec () =
   Alcotest.(check testable_expr)
     "1 + 2 * 3"
-    (EBinop (Add, EInt 1, EBinop (Mul, EInt 2, EInt 3)))
+    (EBinOp (Add, EInt 1, EBinOp (Mul, EInt 2, EInt 3)))
     (parse "1 + 2 * 3")
 
 let test_parse_paren_prec () =
   Alcotest.(check testable_expr)
     "(1 + 2) * 3"
-    (EBinop (Mul, EBinop (Add, EInt 1, EInt 2), EInt 3))
+    (EBinOp (Mul, EBinOp (Add, EInt 1, EInt 2), EInt 3))
     (parse "(1 + 2) * 3")
 
 let test_parse_if () =
@@ -82,66 +82,63 @@ let test_parse_if_assoc () =
 let test_parse_if_prec () =
   Alcotest.(check testable_expr)
     "if true then 1 else 2 + 3"
-    (EIf (EBool true, EInt 1, EBinop (Add, EInt 2, EInt 3)))
+    (EIf (EBool true, EInt 1, EBinOp (Add, EInt 2, EInt 3)))
     (parse "if true then 1 else 2 + 3")
 
 let test_parse_let () =
   Alcotest.(check testable_expr)
     "let x = 1 in x + 2"
-    (ELet ("x", EInt 1, EBinop (Add, EVar "x", EInt 2)))
+    (ELet ("x", EInt 1, EBinOp (Add, EVar "x", EInt 2)))
     (parse "let x = 1 in x + 2")
 
 let test_parse_let_prec () =
   Alcotest.(check testable_expr)
     "let x = 1 in x + 2 * 3"
-    (ELet ("x", EInt 1, EBinop (Add, EVar "x", EBinop (Mul, EInt 2, EInt 3))))
+    (ELet ("x", EInt 1, EBinOp (Add, EVar "x", EBinOp (Mul, EInt 2, EInt 3))))
     (parse "let x = 1 in x + 2 * 3")
 
 let test_parse_let_assoc () =
   Alcotest.(check testable_expr)
     "let x = 1 in let y = 2 in x + y"
-    (ELet ("x", EInt 1, ELet ("y", EInt 2, EBinop (Add, EVar "x", EVar "y"))))
+    (ELet ("x", EInt 1, ELet ("y", EInt 2, EBinOp (Add, EVar "x", EVar "y"))))
     (parse "let x = 1 in let y = 2 in x + y")
 
 let test_parse_fun () =
   Alcotest.(check testable_expr)
     "fun x -> x + 1"
-    (EFun ("x", EBinop (Add, EVar "x", EInt 1)))
+    (EFun ("x", EBinOp (Add, EVar "x", EInt 1)))
     (parse "fun x -> x + 1")
 
 let test_parse_fun_prec () =
   Alcotest.(check testable_expr)
     "fun x -> x + 1 * 2"
-    (EFun ("x", EBinop (Add, EVar "x", EBinop (Mul, EInt 1, EInt 2))))
+    (EFun ("x", EBinOp (Add, EVar "x", EBinOp (Mul, EInt 1, EInt 2))))
     (parse "fun x -> x + 1 * 2")
 
 let test_parse_fun_assoc () =
   Alcotest.(check testable_expr)
     "fun x -> fun y -> x + y"
-    (EFun ("x", EFun ("y", EBinop (Add, EVar "x", EVar "y"))))
+    (EFun ("x", EFun ("y", EBinOp (Add, EVar "x", EVar "y"))))
     (parse "fun x -> fun y -> x + y")
 
 let test_parse_app () =
   Alcotest.(check testable_expr)
     "(fun x -> x + 1) 2"
-    (EApp (EFun ("x", EBinop (Add, EVar "x", EInt 1)), EInt 2))
+    (EApp (EFun ("x", EBinOp (Add, EVar "x", EInt 1)), EInt 2))
     (parse "(fun x -> x + 1) 2")
 
 let test_parse_app_prec () =
   Alcotest.(check testable_expr)
     "fun x -> x + f 2"
-    (EFun ("x", EBinop (Add, EVar "x", EApp (EVar "f", EInt 2))))
+    (EFun ("x", EBinOp (Add, EVar "x", EApp (EVar "f", EInt 2))))
     (parse "fun x -> x + f 2")
 
 let test_parse_let_fun () =
   Alcotest.(check testable_expr)
     "let f = fun x -> x + 1 in f 2"
     (ELet
-       ( "f",
-         EFun ("x", EBinop (Add, EVar "x", EInt 1)),
-         EApp (EVar "f", EInt 2) ))
+       ("f", EFun ("x", EBinOp (Add, EVar "x", EInt 1)), EApp (EVar "f", EInt 2)))
     (parse "let f = fun x -> x + 1 in f 2")
-
 
 let sum_to =
   ERec
@@ -149,18 +146,23 @@ let sum_to =
       EFun
         ( "n",
           EIf
-            ( EBinop (Lte, EVar "n", EInt 0),
+            ( EBinOp (Lte, EVar "n", EInt 0),
               EInt 0,
-              EBinop
+              EBinOp
                 ( Add,
                   EVar "n",
-                  EApp (EVar "sum_to", EBinop (Sub, EVar "n", EInt 1)) ) ) ) )
+                  EApp (EVar "sum_to", EBinOp (Sub, EVar "n", EInt 1)) ) ) ) )
 
 let test_parse_rec () =
   Alcotest.(check testable_expr)
-    "rec sum_to n -> if n <= 0 then 0 else n + sum_to (n - 1)"
-    sum_to
-    (parse "rec sum_to n -> if n <= 0 then 0 else n + sum_to (n - 1)")
+    "rec f -> fun x -> f x"
+    (ERec ("f", EFun ("x", EApp (EVar "f", EVar "x"))))
+    (parse "rec f -> fun x -> f x")
+
+let test_parse_sum_to () =
+  Alcotest.(check testable_expr)
+    "rec sum_to -> fun n -> if n <= 0 then 0 else n + sum_to (n - 1)"
+    sum_to (parse "rec sum_to -> fun n -> if n <= 0 then 0 else n + sum_to (n - 1)")
 
 let testable_value =
   let pp_value pp v =
@@ -174,7 +176,6 @@ let testable_value =
 let testable_typ =
   let rec pp_typ pp t = Fmt.pf pp "%a" pp_typ t in
   Alcotest.testable pp_typ ( = )
-
 
 let test_infer () =
   let ty = infer_top sum_to in
@@ -216,6 +217,7 @@ let () =
           Alcotest.test_case "app precedence" `Quick test_parse_app_prec;
           Alcotest.test_case "let fun" `Quick test_parse_let_fun;
           Alcotest.test_case "rec" `Quick test_parse_rec;
+          Alcotest.test_case "sum_to" `Quick test_parse_sum_to;
         ] );
       ("typing", [ Alcotest.test_case "infer" `Quick test_infer ]);
       ("eval", [ Alcotest.test_case "eval" `Quick test_eval ]);

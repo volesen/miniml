@@ -7,6 +7,7 @@ and env = envbinding Env.t
 
 let err_unbnound_var = "Unbound variable"
 let err_type_error = "Type error"
+let err_bad_recursion = "Right hand side of `let rec` has to be a function"
 
 let rec eval env e =
   match e with
@@ -14,7 +15,8 @@ let rec eval env e =
   | EBool b -> VBool b
   | EFun (x, e) -> VClosure (x, e, env)
   | EVar x -> eval_var env x
-  | EBinop (op, e1, e2) -> eval_binop env op e1 e2
+  | EUnOp (op, e) -> eval_un_op env op e
+  | EBinOp (op, e1, e2) -> eval_bin_op env op e1 e2
   | ELet (x, e1, e2) -> eval_let env x e1 e2
   | EIf (e1, e2, e3) -> eval_if env e1 e2 e3
   | EApp (e1, e2) -> eval_app env e1 e2
@@ -24,10 +26,15 @@ and eval_var env x =
   try
     match !(Env.find x env) with
     | Some v -> v
-    | None -> failwith "Right hand side of `let rec` has to be a function"
+    | None -> failwith err_bad_recursion
   with Not_found -> failwith err_unbnound_var
 
-and eval_binop env op e1 e2 =
+and eval_un_op env op e =
+  match (op, eval env e) with
+  | Neg, VInt i -> VInt (-i)
+  | _ -> failwith err_type_error
+
+and eval_bin_op env op e1 e2 =
   match (op, eval env e1, eval env e2) with
   | Add, VInt i, VInt j -> VInt (i + j)
   | Sub, VInt i, VInt j -> VInt (i - j)

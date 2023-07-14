@@ -86,7 +86,8 @@ let rec infer ctx e =
   | EInt _ -> (TInt, [])
   | EBool _ -> (TBool, [])
   | EVar x -> infer_var ctx x
-  | EBinop (op, e1, e2) -> infer_binop ctx op e1 e2
+  | EUnOp (op, e) -> infer_un_op ctx op e
+  | EBinOp (op, e1, e2) -> infer_bin_op ctx op e1 e2
   | ELet (x, e1, e2) -> infer_let ctx x e1 e2
   | EIf (e1, e2, e3) -> infer_if ctx e1 e2 e3
   | EFun (x, e) -> infer_fun ctx x e
@@ -100,7 +101,14 @@ and infer_var ctx x =
     (t, [])
   with Not_found -> failwith ("Unbound variable " ^ x)
 
-and infer_binop ctx op e1 e2 =
+and infer_un_op ctx op e =
+  let t1, c1 = infer ctx e in
+  match op with
+  | Neg ->
+      let c = [ (t1, TInt) ] in
+      (TInt, c1 @ c)
+
+and infer_bin_op ctx op e1 e2 =
   let t1, c1 = infer ctx e1 in
   let t2, c2 = infer ctx e2 in
   match op with

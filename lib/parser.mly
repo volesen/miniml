@@ -17,13 +17,10 @@ open Ast
 %left LTE
 %left PLUS MINUS
 %left STAR
-%nonassoc INT ID TRUE FALSE LPAREN IF LET FUN REC // Tokens that start an expression
-%nonassoc APP // Only used for precedence
 
 %start program
 
-%type <Ast.expr>program
-%type <Ast.expr>expr;
+%type <Ast.expr> program expr unary app primary
 
 %%
 
@@ -32,17 +29,12 @@ program:
 	;
 
 expr:
-	| i = INT { EInt i }
-	| id = ID { EVar id }
-	| TRUE { EBool true }
-	| FALSE { EBool false }
-	| e1 = expr; op = bin_op; e2 = expr { EBinop(op, e1, e2) }
+	| e1 = expr; op = bin_op; e2 = expr { EBinOp(op, e1, e2) }
 	| IF; e1 = expr; THEN; e2 = expr; ELSE; e3 = expr { EIf(e1, e2, e3) }
 	| LET; x = ID; EQUALS; e1 = expr; IN; e2 = expr { ELet(x, e1, e2) }
-	| LPAREN; e = expr; RPAREN { e }
 	| FUN; x = ID; ARROW; e = expr { EFun(x, e) }
 	| REC; x = ID; ARROW; e = expr { ERec(x, e) }
-	| e1 = expr; e2 = expr %prec APP { EApp(e1, e2) }
+	| e = unary { e }
 	;
 
 %inline bin_op:
@@ -50,4 +42,26 @@ expr:
 	| MINUS { Sub }
 	| STAR { Mul }
 	| LTE { Lte }
+	;
+
+unary:
+	| op = un_op; e = unary { EUnOp(op, e) }
+	| e = app { e }
+	;
+
+%inline un_op:
+	| MINUS { Neg }
+
+
+app:
+	| e1 = app; e2 = primary { EApp(e1, e2) }
+	| e = primary { e }
+	;
+
+primary:
+	| i = INT { EInt i }
+	| id = ID { EVar id }
+	| TRUE { EBool true }
+	| FALSE { EBool false }
+	| LPAREN; e = expr; RPAREN { e }
 	;

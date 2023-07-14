@@ -5,6 +5,12 @@ type value = VInt of int | VBool of bool | VClosure of string * expr * env
 and envbinding = value option ref
 and env = envbinding Env.t
 
+let string_of_value (v : value) : string =
+  match v with
+  | VInt i -> string_of_int i
+  | VBool b -> string_of_bool b
+  | VClosure _ -> "<fun>"
+
 let err_unbnound_var = "Unbound variable"
 let err_type_error = "Type error"
 let err_bad_recursion = "Right hand side of `let rec` has to be a function"

@@ -38,7 +38,7 @@ $ dune exec miniml
 - [ ] Mutual recursion
 - [x] Type inference with let-polymorphism
 - [ ] Type classes
-- [ ] REPL
+- [x] REPL
 
 ## References
 

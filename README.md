@@ -1,22 +1,20 @@
 # miniml
 
-A minim(a)l ML dialect, but with ad-hoc polymorphism through type classes.
+A minim(a)l subset of OCaml with Hindley-Milner type inference.
 
 ## Example
 
 ```
-let sum_to =
-  rec sum_to ->
-    fun n ->
-      if n <= 0
-        then 0
-        else n + sum_to (n - 1)
+let rec sum_to =
+  fun n ->
+    if n <= 0
+      then 0
+      else n + sum_to (n - 1)
 in
   sum_to 10
 
 > 55
 ```
-
 
 ## Quickstart
 
@@ -26,18 +24,18 @@ $ dune exec miniml
 
 ## Non-goals
 
-- Great error messages
+- Pattern matching (for now)
+- Good error messages
 
 ## Progress
 
 - [x] Lexer
 - [x] Parser
-- [ ] Sweet syntax
+- [x] Sweet syntax
 - [x] Basic interpreter
 - [x] Recursion
-- [ ] Mutual recursion
+- [ ] Binding groups
 - [x] Type inference with let-polymorphism
-- [ ] Type classes
 - [x] REPL
 
 ## References

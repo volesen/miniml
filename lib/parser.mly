@@ -31,9 +31,9 @@ program:
 expr:
 	| e1 = expr; op = bin_op; e2 = expr { EBinOp(op, e1, e2) }
 	| IF; e1 = expr; THEN; e2 = expr; ELSE; e3 = expr { EIf(e1, e2, e3) }
-	| LET; x = ID; EQUALS; e1 = expr; IN; e2 = expr { ELet(x, e1, e2) }
 	| FUN; x = ID; ARROW; e = expr { EFun(x, e) }
-	| REC; x = ID; ARROW; e = expr { ERec(x, e) }
+	| LET; x = ID; EQUALS; e1 = expr; IN; e2 = expr { ELet(x, e1, e2) }
+	| LET; REC; x = ID; EQUALS; e1 = expr; IN; e2 = expr { ELet(x, ERec(x, e1), e2) }
 	| e = unary { e }
 	;
 
@@ -51,7 +51,7 @@ unary:
 
 %inline un_op:
 	| MINUS { Neg }
-
+	;
 
 app:
 	| e1 = app; e2 = primary { EApp(e1, e2) }

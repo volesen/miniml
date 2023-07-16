@@ -17,7 +17,7 @@ let test_parse_int () =
   Alcotest.(check testable_expr) "42" (EInt 42) (parse "42")
 
 let test_parse_neg_int () =
-  Alcotest.(check testable_expr) "-42" (EUnOp(Neg, EInt(42))) (parse "-42")
+  Alcotest.(check testable_expr) "-42" (EUnOp (Neg, EInt 42)) (parse "-42")
 
 let test_parse_add () =
   Alcotest.(check testable_expr)
@@ -140,7 +140,7 @@ let test_parse_let_fun () =
        ("f", EFun ("x", EBinOp (Add, EVar "x", EInt 1)), EApp (EVar "f", EInt 2)))
     (parse "let f = fun x -> x + 1 in f 2")
 
-let sum_to =
+let sum_to_body =
   ERec
     ( "sum_to",
       EFun
@@ -153,16 +153,16 @@ let sum_to =
                   EVar "n",
                   EApp (EVar "sum_to", EBinOp (Sub, EVar "n", EInt 1)) ) ) ) )
 
-let test_parse_rec () =
-  Alcotest.(check testable_expr)
-    "rec f -> fun x -> f x"
-    (ERec ("f", EFun ("x", EApp (EVar "f", EVar "x"))))
-    (parse "rec f -> fun x -> f x")
+let sum_to = ELet ("sum_to", sum_to_body, EApp (EVar "sum_to", EInt 10))
 
 let test_parse_sum_to () =
   Alcotest.(check testable_expr)
-    "rec sum_to -> fun n -> if n <= 0 then 0 else n + sum_to (n - 1)"
-    sum_to (parse "rec sum_to -> fun n -> if n <= 0 then 0 else n + sum_to (n - 1)")
+    "let rec sum_to = fun n -> if n <= 0 then 0 else n + sum_to (n - 1) in \
+     sum_to 10"
+    sum_to
+    (parse
+       "let rec sum_to = fun n -> if n <= 0 then 0 else n + sum_to (n - 1) in \
+        sum_to 10")
 
 let testable_value =
   let pp_value pp v =
@@ -178,12 +178,12 @@ let testable_typ =
   Alcotest.testable pp_typ ( = )
 
 let test_infer () =
-  let ty = infer_top sum_to in
+  let ty = infer_top sum_to_body in
   Alcotest.(check testable_typ) "sum_to" (TArrow (TInt, TInt)) ty
 
 let test_eval () =
   let env = Env.empty in
-  let v = eval env (EApp (sum_to, EInt 10)) in
+  let v = eval env sum_to in
   Alcotest.(check testable_value) "sum_to 10" (VInt 55) v
 
 let () =
@@ -216,7 +216,6 @@ let () =
           Alcotest.test_case "app" `Quick test_parse_app;
           Alcotest.test_case "app precedence" `Quick test_parse_app_prec;
           Alcotest.test_case "let fun" `Quick test_parse_let_fun;
-          Alcotest.test_case "rec" `Quick test_parse_rec;
           Alcotest.test_case "sum_to" `Quick test_parse_sum_to;
         ] );
       ("typing", [ Alcotest.test_case "infer" `Quick test_infer ]);
